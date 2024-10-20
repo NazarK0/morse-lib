@@ -17,21 +17,7 @@ pub struct MorseChar {
     sound: Sound,
 }
 
-pub enum SpecialChars {
-    Whitespace,
-}
-
 impl MorseChar {
-    pub fn new(units: Vec<MorseUnit>, letter: char, language: &str) -> MorseChar {
-        MorseChar {
-            m_char: units,
-            alpha_char: letter,
-            language: language.to_string(),
-            display_as: DisplayChars::default(),
-            sound: Sound::default(),
-        }
-    }
-
     pub fn from_char(
         letter: char,
         language: &str,
@@ -85,10 +71,6 @@ impl MorseChar {
         }
     }
 
-    pub fn to_alpha(&self) -> char {
-        self.alpha_char
-    }
-
     pub fn to_bin_str(&self) -> String {
         let mut string = String::new();
         for (idx, m_unit) in self.m_char.iter().enumerate() {
@@ -105,10 +87,6 @@ impl MorseChar {
         }
 
         string
-    }
-
-    pub fn get_language(&self) -> String {
-        self.language.clone()
     }
 
     pub fn dot_as(&mut self, alias: &str) {
@@ -194,18 +172,6 @@ mod morse_char_tests {
         assert_eq!(
             MorseChar::from_bin(H_BIN, "International", into_int_char).to_bin_str(),
             H_BIN
-        );
-    }
-
-    #[test]
-    fn get_language() {
-        assert_eq!(
-            MorseChar::from_char('R', "International", from_int_char).get_language(),
-            "International"
-        );
-        assert_eq!(
-            MorseChar::from_bin("1", "International", into_int_char).get_language(),
-            "International"
         );
     }
 
