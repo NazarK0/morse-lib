@@ -1,19 +1,19 @@
-mod morse_char;
 use std::{cell::RefCell, thread, time};
 
-pub use morse_char::*;
+mod morse_char;
+use morse_char::*;
 
 mod morse_unit;
 pub use morse_unit::MorseUnit;
 
 mod morse_processors;
-pub use morse_processors::*;
+use morse_processors::*;
 
 mod display_chars;
-pub use display_chars::DisplayChars;
+use display_chars::DisplayChars;
 
 mod sound;
-pub use sound::Sound;
+use sound::Sound;
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct Morse {

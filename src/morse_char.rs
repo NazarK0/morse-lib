@@ -174,6 +174,8 @@ fn play_sound(freq: f32, duration: u8, speed: f32) {
 
 #[cfg(test)]
 mod morse_char_tests {
+    
+
     use crate::{from_int_char, into_int_char};
 
     use super::*;
