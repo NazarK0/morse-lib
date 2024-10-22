@@ -2,6 +2,7 @@
 [0.2.1]
 * Update Readme.md
 * Add Description for MorseUnit enum
+  
 [0.2.0]
 * *:
     - add library documentation with examples
