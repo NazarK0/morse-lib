@@ -4,7 +4,3 @@ pub enum MorseUnit {
     Line,
     Whitespace, // End Of Word
 }
-
-impl MorseUnit {
-    pub fn to_beep(&self) {}
-}

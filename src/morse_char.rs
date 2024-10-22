@@ -1,9 +1,6 @@
-use std::{
-    thread,
-    time::{self, Duration},
-};
+use std::{thread, time};
 
-use rodio::{source::SineWave, OutputStream, Sink, Source};
+use crate::sound::TSound;
 
 // use super::MorseUnit::Whitespace;
 use super::{convert_from_bin, DisplayChars, MorseUnit, Sound};
@@ -11,7 +8,7 @@ use super::{convert_from_bin, DisplayChars, MorseUnit, Sound};
 #[derive(Debug, PartialEq, Clone)]
 pub struct MorseChar {
     m_char: Vec<MorseUnit>,
-    alpha_char: char,
+    letter: char,
     language: String,
     display_as: DisplayChars,
     sound: Sound,
@@ -27,7 +24,7 @@ impl MorseChar {
 
         MorseChar {
             m_char,
-            alpha_char: letter,
+            letter,
             language: language.to_string(),
             display_as: DisplayChars::default(),
             sound: Sound::default(),
@@ -43,10 +40,10 @@ impl MorseChar {
 
         MorseChar {
             m_char: m_char.clone(),
-            alpha_char: into_char(m_char),
+            letter: into_char(m_char),
             language: language.to_string(),
             display_as: DisplayChars::default(),
-            sound: Sound ::default(),
+            sound: Sound::default(),
         }
     }
 
@@ -54,10 +51,10 @@ impl MorseChar {
         for (idx, m_unit) in self.m_char.iter().enumerate() {
             let _ = match m_unit {
                 MorseUnit::Dot => {
-                    play_sound(self.sound.frequency, 1, self.sound.speed);
+                    self.sound.play(self.sound.frequency, 1, self.sound.speed);
                 }
                 MorseUnit::Line => {
-                    play_sound(self.sound.frequency, 3, self.sound.speed);
+                    self.sound.play(self.sound.frequency, 3, self.sound.speed);
                 }
                 MorseUnit::Whitespace => {
                     std::thread::sleep(std::time::Duration::from_secs(1));
@@ -107,6 +104,10 @@ impl MorseChar {
     pub fn play_speed(&mut self, speed: f32) {
         self.sound.speed = speed;
     }
+
+    pub fn get_letter(&self) -> char {
+        self.letter
+    }
 }
 
 impl ToString for MorseChar {
@@ -133,26 +134,8 @@ impl ToString for MorseChar {
     }
 }
 
-fn play_sound(freq: f32, duration: u8, speed: f32) {
-    // on linux require pkg-config libudev-dev libasound2-dev
-    // _stream must live as long as the sink
-    let (_stream, stream_handle) = OutputStream::try_default().unwrap();
-    let sink = Sink::try_new(&stream_handle).unwrap();
-
-    // Add a dummy source of the sake of the example.
-    let source = SineWave::new(freq)
-        .take_duration(Duration::from_secs_f32((duration as f32) / speed))
-        .amplify(0.20);
-    sink.append(source);
-
-    // The sound plays in a separate thread. This call will block the current thread until the sink
-    // has finished playing all its queued sounds.
-    sink.sleep_until_end();
-}
-
 #[cfg(test)]
 mod morse_char_tests {
-    
 
     use crate::{from_int_char, into_int_char};
 
