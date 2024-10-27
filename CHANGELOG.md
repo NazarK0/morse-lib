@@ -1,4 +1,7 @@
 # Morse Library changelog
+[0.3.0]
+* Implement Iterator and IntoIterator
+* Create own Result, Error, and error propagation
 [0.2.1]
 * Update Readme.md
 * Add Description for MorseUnit enum
