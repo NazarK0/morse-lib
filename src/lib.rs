@@ -35,11 +35,9 @@
 
 use std::{cell::RefCell, thread, time};
 
+// Private modules
 mod morse_char;
 use morse_char::*;
-
-mod morse_unit;
-pub use morse_unit::MorseUnit;
 
 mod morse_processors;
 use morse_processors::*;
@@ -49,6 +47,12 @@ use display_chars::DisplayChars;
 
 mod sound;
 use sound::Sound;
+// Public modules
+mod morse_unit;
+pub use morse_unit::MorseUnit;
+
+mod error;
+pub use error::*;
 
 /// ## Main library struct.
 ///
@@ -59,8 +63,8 @@ pub struct Morse {
     language: String,
     display_as: DisplayChars,
     sound: Sound,
-    from_char_converter: fn(char) -> Vec<MorseUnit>,
-    into_char_converter: fn(Vec<MorseUnit>) -> char,
+    from_char_converter: fn(char) -> MorseResult<Vec<MorseUnit>>,
+    into_char_converter: fn(Vec<MorseUnit>) -> MorseResult<char>,
 }
 
 impl Morse {
@@ -68,35 +72,35 @@ impl Morse {
     /// # Examples
     ///
     /// ```
-    /// use morse_lib::{Morse, MorseUnit};
+    /// use morse_lib::{Morse, MorseUnit, MorseError, MorseResult};
     /// use MorseUnit::{Dot, Line, Whitespace};
     ///
-    /// fn from_char(letter: char) -> Vec<MorseUnit> {
+    /// fn from_char(letter: char) -> MorseResult<Vec<MorseUnit>>{
     ///     match letter {
-    ///         'a' => vec![Dot, Line],
-    ///         'б' => vec![Line, Dot, Dot, Dot],
-    ///         'в' => vec![Dot, Line, Line],
-    ///         'г' => vec![Dot, Dot, Dot, Dot],
-    ///         ' ' => vec![Whitespace],
-    ///           _ => panic!("Wrong character")
+    ///         'a' => Ok(vec![Dot, Line]),
+    ///         'б' => Ok(vec![Line, Dot, Dot, Dot]),
+    ///         'в' => Ok(vec![Dot, Line, Line]),
+    ///         'г' => Ok(vec![Dot, Dot, Dot, Dot]),
+    ///         ' ' => Ok(vec![Whitespace]),
+    ///           _ => Err(MorseError::InvalidChar)
     ///     }
     /// }
     ///
-    /// fn into_char(letter: Vec<MorseUnit>) -> char {
+    /// fn into_char(letter: Vec<MorseUnit>) -> MorseResult<char> {
     ///     if letter.len() == 1 && letter[0] == Whitespace {
-    ///         return ' ';
+    ///         return Ok(' ');
     ///     } else if letter.len() == 2 && letter[0] == Dot && letter[1] == Line {
-    ///         return 'а'
+    ///         return Ok('а')
     ///     } else if letter.len() == 3 && letter[0] == Dot && letter[1] == Line && letter[2] == Line {
-    ///         return 'в';
+    ///         return Ok('в');
     ///     } else if letter.len() == 4 {
     ///         if letter[0] == Line && letter[1] == Dot && letter[2] == Dot && letter[3] == Dot {
-    ///             return 'б';
+    ///             return Ok('б');
     ///         } else {
-    ///             return 'г';
+    ///             return Ok('г');
     ///         }
     ///     } else {
-    ///         panic!("Wrong Morse Char sequence")
+    ///         Err(MorseError::InvalidMorseSequence)
     ///     }
     /// }
     ///
@@ -104,8 +108,8 @@ impl Morse {
     /// ```
     pub fn new(
         language: String,
-        from_char: fn(char) -> Vec<MorseUnit>,
-        into_char: fn(Vec<MorseUnit>) -> char,
+        from_char: fn(char) -> MorseResult<Vec<MorseUnit>>,
+        into_char: fn(Vec<MorseUnit>) -> MorseResult<char>,
     ) -> Morse {
         Morse {
             morse: Vec::new(),
@@ -122,27 +126,27 @@ impl Morse {
     /// ```
     /// use morse_lib::Morse;
     ///
-    /// let morse = Morse::from_int_text("sos");
+    /// let morse = Morse::from_int_text("sos").unwrap();
     ///
     /// assert_eq!(
     ///        morse.to_string(),
     ///        ". . .   ⚊ ⚊ ⚊   . . ."
     ///    );
     /// ```
-    pub fn from_int_text(text: &str) -> Morse {
+    pub fn from_int_text(text: &str) -> MorseResult<Morse> {
         let mut morse: Vec<MorseChar> = Vec::new();
 
         for letter in text.chars() {
-            morse.push(MorseChar::from_char(letter, "International", from_int_char));
+            morse.push(MorseChar::from_char(letter, "International", from_int_char)?);
         }
 
-        Morse {
+        Ok(Morse {
             morse,
             ..Morse::default()
-        }
+        })
     }
     /// Parse text into Morse Code.
-    pub fn parse_text(&mut self, text: &str) {
+    pub fn parse_text(&mut self, text: &str) -> MorseResult<()> {
         let mut morse: Vec<MorseChar> = Vec::new();
 
         for letter in text.chars() {
@@ -150,8 +154,10 @@ impl Morse {
                 letter,
                 &self.language,
                 self.from_char_converter,
-            ));
+            )?);
         }
+
+        Ok(())
     }
 
     /// Creates International Morse Code struct from binary.
@@ -160,14 +166,14 @@ impl Morse {
     /// ```
     /// use morse_lib::Morse;
     ///
-    /// let morse = Morse::from_int_bin("101010001110111011100010101");
+    /// let morse = Morse::from_int_bin("101010001110111011100010101").unwrap();
     ///
     /// assert_eq!(
     ///        morse.to_string(),
     ///        ". . .   ⚊ ⚊ ⚊   . . ."
     ///    );
     /// ```
-    pub fn from_int_bin(bin: &str) -> Morse {
+    pub fn from_int_bin(bin: &str) -> MorseResult<Morse> {
         let words: Vec<&str> = bin.split("0000000").collect();
         let mut morse: Vec<MorseChar> = Vec::new();
 
@@ -175,17 +181,17 @@ impl Morse {
             let letters: Vec<&str> = word.split("000").collect();
 
             for letter in letters {
-                morse.push(MorseChar::from_bin(letter, "International", into_int_char));
+                morse.push(MorseChar::from_bin(letter, "International", into_int_char)?);
             }
         }
 
-        Morse {
+        Ok(Morse {
             morse,
             ..Morse::default()
-        }
+        })
     }
     /// Parse binary into Morse Code.
-    pub fn parse_bin(&mut self, bin: &str) {
+    pub fn parse_bin(&mut self, bin: &str)-> MorseResult<()> {
         let words: Vec<&str> = bin.split("0000000").collect();
 
         for word in words {
@@ -196,9 +202,11 @@ impl Morse {
                     letter,
                     &self.language,
                     self.into_char_converter,
-                ));
+                )?);
             }
         }
+
+        Ok(())
     }
 
     /// Play sound that represent Morse Code.
@@ -226,7 +234,7 @@ impl Morse {
     /// ```
     /// use morse_lib::Morse;
     ///
-    /// let mut morse = Morse::from_int_text("sos");
+    /// let mut morse = Morse::from_int_text("sos").unwrap();
     /// morse.dot_as("🔥");
     ///
     /// assert_eq!(
@@ -243,7 +251,7 @@ impl Morse {
     /// ```
     /// use morse_lib::Morse;
     ///
-    /// let mut morse = Morse::from_int_text("sos");
+    /// let mut morse = Morse::from_int_text("sos").unwrap();
     /// morse.line_as("➖");
     ///
     /// assert_eq!(
@@ -260,7 +268,7 @@ impl Morse {
     /// ```
     /// use morse_lib::Morse;
     ///
-    /// let mut morse = Morse::from_int_text("s o");
+    /// let mut morse = Morse::from_int_text("s o").unwrap();
     /// morse.whitespace_as("🚧");
     ///
     /// assert_eq!(
@@ -277,7 +285,7 @@ impl Morse {
     /// ```
     /// use morse_lib::Morse;
     ///
-    /// let mut morse = Morse::from_int_text("s o");
+    /// let mut morse = Morse::from_int_text("s o").unwrap();
     /// morse.frequency(643.0);
     /// ```
     pub fn frequency(&mut self, frequency: f32) {
@@ -292,7 +300,7 @@ impl Morse {
     /// ```
     /// use morse_lib::Morse;
     ///
-    /// let mut morse = Morse::from_int_text("s o");
+    /// let mut morse = Morse::from_int_text("s o").unwrap();
     /// morse.play_speed(2.0);
     /// ```
     pub fn play_speed(&mut self, speed: f32) {
@@ -304,7 +312,7 @@ impl Morse {
     /// ```
     /// use morse_lib::Morse;
     ///
-    /// let morse = Morse::from_int_text("sos");
+    /// let morse = Morse::from_int_text("sos").unwrap();
     ///
     /// assert_eq!(
     ///        morse.to_bin_str(),
@@ -331,7 +339,7 @@ impl Morse {
     /// ```
     /// use morse_lib::Morse;
     ///
-    /// let morse = Morse::from_int_bin("101010001110111011100010101");
+    /// let morse = Morse::from_int_bin("101010001110111011100010101").unwrap();
     /// let text = morse.to_text();
     ///
     /// assert_eq!(
@@ -364,6 +372,7 @@ impl Default for Morse {
 }
 
 impl ToString for Morse {
+    /// Return String value of Morse Code.
     fn to_string(&self) -> String {
         let mut string = String::new();
         let morse = RefCell::new(self.morse.clone());
@@ -391,7 +400,7 @@ mod morse_tests {
     #[test]
     fn create_from_text_str() {
         assert_eq!(
-            Morse::from_int_text("Hello").to_bin_str(),
+            Morse::from_int_text("Hello").unwrap().to_bin_str(),
             "1010101000100010111010100010111010100011101110111"
         );
     }
@@ -399,17 +408,17 @@ mod morse_tests {
     #[test]
     fn create_from_binary_str() {
         const HELLO_BIN: &str = "1010101000100010111010100010111010100011101110111";
-        assert_eq!(Morse::from_int_bin(HELLO_BIN).to_bin_str(), HELLO_BIN);
+        assert_eq!(Morse::from_int_bin(HELLO_BIN).unwrap().to_bin_str(), HELLO_BIN);
     }
 
     #[test]
     fn get_language() {
         assert_eq!(
-            Morse::from_int_text("hello").get_language(),
+            Morse::from_int_text("hello").unwrap().get_language(),
             "International".to_string()
         );
         assert_eq!(
-            Morse::from_int_bin("1").get_language(),
+            Morse::from_int_bin("1").unwrap().get_language(),
             "International".to_string()
         );
     }
@@ -417,7 +426,7 @@ mod morse_tests {
     #[test]
     fn to_string() {
         assert_eq!(
-            Morse::from_int_text("hi u").to_string(),
+            Morse::from_int_text("hi u").unwrap().to_string(),
             ". . . .   . .       . . ⚊"
         );
     }
@@ -425,13 +434,13 @@ mod morse_tests {
     #[test]
     fn to_bin_str() {
         assert_eq!(
-            Morse::from_int_text("hi u").to_bin_str(),
+            Morse::from_int_text("hi u").unwrap().to_bin_str(),
             "101010100010100000001010111"
         );
     }
     #[test]
     fn set_aliases_for_whitespace_lines_and_dots() {
-        let mut morse = Morse::from_int_text("hi u");
+        let mut morse = Morse::from_int_text("hi u").unwrap();
 
         morse.dot_as("🔥");
         morse.line_as("➖");

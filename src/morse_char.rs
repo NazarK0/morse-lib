@@ -1,6 +1,6 @@
 use std::{thread, time};
 
-use crate::sound::TSound;
+use crate::{sound::TSound, MorseResult};
 
 // use super::MorseUnit::Whitespace;
 use super::{convert_from_bin, DisplayChars, MorseUnit, Sound};
@@ -18,33 +18,33 @@ impl MorseChar {
     pub fn from_char(
         letter: char,
         language: &str,
-        converter: fn(char) -> Vec<MorseUnit>,
-    ) -> MorseChar {
-        let m_char: Vec<MorseUnit> = converter(letter);
+        converter: fn(char) -> MorseResult<Vec<MorseUnit>>,
+    ) -> MorseResult<MorseChar> {
+        let m_char: Vec<MorseUnit> = converter(letter)?;
 
-        MorseChar {
+        Ok(MorseChar {
             m_char,
             letter,
             language: language.to_string(),
             display_as: DisplayChars::default(),
             sound: Sound::default(),
-        }
+        })
     }
 
     pub fn from_bin(
         letter: &str,
         language: &str,
-        into_char: fn(Vec<MorseUnit>) -> char,
-    ) -> MorseChar {
-        let m_char: Vec<MorseUnit> = convert_from_bin(letter);
+        into_char: fn(Vec<MorseUnit>) -> MorseResult<char>,
+    ) -> MorseResult<MorseChar> {
+        let m_char: Vec<MorseUnit> = convert_from_bin(letter)?;
 
-        MorseChar {
+        Ok(MorseChar {
             m_char: m_char.clone(),
-            letter: into_char(m_char),
+            letter: into_char(m_char)?,
             language: language.to_string(),
             display_as: DisplayChars::default(),
             sound: Sound::default(),
-        }
+        })
     }
 
     pub fn to_beep(&self) {
@@ -144,7 +144,7 @@ mod morse_char_tests {
     #[test]
     fn create_from_text_str() {
         assert_eq!(
-            MorseChar::from_char('H', "International", from_int_char).to_bin_str(),
+            MorseChar::from_char('H', "International", from_int_char).unwrap().to_bin_str(),
             "1010101"
         );
     }
@@ -153,7 +153,7 @@ mod morse_char_tests {
     fn create_from_binary_str() {
         const H_BIN: &str = "1010101";
         assert_eq!(
-            MorseChar::from_bin(H_BIN, "International", into_int_char).to_bin_str(),
+            MorseChar::from_bin(H_BIN, "International", into_int_char).unwrap().to_bin_str(),
             H_BIN
         );
     }
@@ -161,7 +161,7 @@ mod morse_char_tests {
     #[test]
     fn to_string() {
         assert_eq!(
-            MorseChar::from_char('u', "International", from_int_char).to_string(),
+            MorseChar::from_char('u', "International", from_int_char).unwrap().to_string(),
             ". . ⚊"
         );
     }
@@ -169,20 +169,20 @@ mod morse_char_tests {
     #[test]
     fn to_bin_str() {
         assert_eq!(
-            MorseChar::from_char('u', "International", from_int_char).to_bin_str(),
+            MorseChar::from_char('u', "International", from_int_char).unwrap().to_bin_str(),
             "1010111"
         );
     }
     #[test]
     fn set_aliases_for_whitespace_lines_and_dots() {
-        let mut morse = MorseChar::from_char('u', "International", from_int_char);
+        let mut morse = MorseChar::from_char('u', "International", from_int_char).unwrap();
 
         morse.dot_as("🔥");
         morse.line_as("➖");
 
         assert_eq!(morse.to_string(), "🔥 🔥 ➖");
 
-        let mut morse = MorseChar::from_char(' ', "International", from_int_char);
+        let mut morse = MorseChar::from_char(' ', "International", from_int_char).unwrap();
 
         morse.whitespace_as("🚧");
 

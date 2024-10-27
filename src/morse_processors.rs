@@ -1,114 +1,115 @@
-use crate::MorseUnit;
+use crate::error::MorseError;
+use crate::{MorseResult, MorseUnit};
 use crate::MorseUnit::{Dot, Line, Whitespace};
 
-pub fn from_int_char(letter: char) -> Vec<MorseUnit> {
+pub fn from_int_char(letter: char) -> MorseResult<Vec<MorseUnit>> {
     match letter.to_ascii_lowercase() {
-        'a' => vec![Dot, Line],
-        'b' => vec![Line, Dot, Dot, Dot],
-        'c' => vec![Line, Dot, Line, Dot],
-        'd' => vec![Line, Dot, Dot],
-        'e' => vec![Dot],
-        'f' => vec![Dot, Dot, Line, Dot],
-        'g' => vec![Line, Line, Dot],
-        'h' => vec![Dot, Dot, Dot, Dot],
-        'i' => vec![Dot, Dot],
-        'j' => vec![Dot, Line, Line, Line],
-        'k' => vec![Line, Dot, Line],
-        'l' => vec![Dot, Line, Dot, Dot],
-        'm' => vec![Line, Line],
-        'n' => vec![Line, Dot],
-        'o' => vec![Line, Line, Line],
-        'p' => vec![Dot, Line, Line, Dot],
-        'q' => vec![Line, Line, Dot, Line],
-        'r' => vec![Dot, Line, Dot],
-        's' => vec![Dot, Dot, Dot],
-        't' => vec![Line],
-        'u' => vec![Dot, Dot, Line],
-        'v' => vec![Dot, Dot, Dot, Line],
-        'w' => vec![Dot, Line, Line],
-        'x' => vec![Line, Dot, Dot, Line],
-        'y' => vec![Line, Dot, Line, Line],
-        'z' => vec![Line, Line, Dot, Dot],
-        '1' => vec![Dot, Line, Line, Line, Line],
-        '2' => vec![Dot, Dot, Line, Line, Line],
-        '3' => vec![Dot, Dot, Dot, Line, Line],
-        '4' => vec![Dot, Dot, Dot, Dot, Line],
-        '5' => vec![Dot, Dot, Dot, Dot, Dot],
-        '6' => vec![Line, Dot, Dot, Dot, Dot],
-        '7' => vec![Line, Line, Dot, Dot, Dot],
-        '8' => vec![Line, Line, Line, Dot, Dot],
-        '9' => vec![Line, Line, Line, Line, Dot],
-        '0' => vec![Line, Line, Line, Line, Line],
-        ' ' => vec![Whitespace],
+        'a' => Ok(vec![Dot, Line]),
+        'b' => Ok(vec![Line, Dot, Dot, Dot]),
+        'c' => Ok(vec![Line, Dot, Line, Dot]),
+        'd' => Ok(vec![Line, Dot, Dot]),
+        'e' => Ok(vec![Dot]),
+        'f' => Ok(vec![Dot, Dot, Line, Dot]),
+        'g' => Ok(vec![Line, Line, Dot]),
+        'h' => Ok(vec![Dot, Dot, Dot, Dot]),
+        'i' => Ok(vec![Dot, Dot]),
+        'j' => Ok(vec![Dot, Line, Line, Line]),
+        'k' => Ok(vec![Line, Dot, Line]),
+        'l' => Ok(vec![Dot, Line, Dot, Dot]),
+        'm' => Ok(vec![Line, Line]),
+        'n' => Ok(vec![Line, Dot]),
+        'o' => Ok(vec![Line, Line, Line]),
+        'p' => Ok(vec![Dot, Line, Line, Dot]),
+        'q' => Ok(vec![Line, Line, Dot, Line]),
+        'r' => Ok(vec![Dot, Line, Dot]),
+        's' => Ok(vec![Dot, Dot, Dot]),
+        't' => Ok(vec![Line]),
+        'u' => Ok(vec![Dot, Dot, Line]),
+        'v' => Ok(vec![Dot, Dot, Dot, Line]),
+        'w' => Ok(vec![Dot, Line, Line]),
+        'x' => Ok(vec![Line, Dot, Dot, Line]),
+        'y' => Ok(vec![Line, Dot, Line, Line]),
+        'z' => Ok(vec![Line, Line, Dot, Dot]),
+        '1' => Ok(vec![Dot, Line, Line, Line, Line]),
+        '2' => Ok(vec![Dot, Dot, Line, Line, Line]),
+        '3' => Ok(vec![Dot, Dot, Dot, Line, Line]),
+        '4' => Ok(vec![Dot, Dot, Dot, Dot, Line]),
+        '5' => Ok(vec![Dot, Dot, Dot, Dot, Dot]),
+        '6' => Ok(vec![Line, Dot, Dot, Dot, Dot]),
+        '7' => Ok(vec![Line, Line, Dot, Dot, Dot]),
+        '8' => Ok(vec![Line, Line, Line, Dot, Dot]),
+        '9' => Ok(vec![Line, Line, Line, Line, Dot]),
+        '0' => Ok(vec![Line, Line, Line, Line, Line]),
+        ' ' => Ok(vec![Whitespace]),
         _ => {
-            panic!("")
+            Err(MorseError::InvalidChar)
         }
     }
 }
 
-pub fn into_int_char(letter: Vec<MorseUnit>) -> char {
+pub fn into_int_char(letter: Vec<MorseUnit>) -> MorseResult<char> {
     if letter.len() == 1 {
         match letter[0] {
-            Dot => return 'e',
-            Line => return 't',
-            Whitespace => return ' ',
+            Dot => return Ok('e'),
+            Line => return Ok('t'),
+            Whitespace => return Ok(' '),
         }
     } else if letter.len() == 2 {
         if letter[0] == Dot && letter[1] == Line {
-            return 'a';
+            return Ok('a');
         } else if letter[0] == Line && letter[1] == Dot {
-            return 'n';
+            return Ok('n');
         } else if letter[0] == Dot && letter[1] == Dot {
-            return 'i';
+            return Ok('i');
         } else {
             // letter[0] == Line && letter[1] == Line
-            return 'm';
+            return Ok('m');
         }
     } else if letter.len() == 3 {
         if letter[0] == Line && letter[1] == Line && letter[2] == Dot {
-            return 'g';
+            return Ok('g');
         } else if letter[0] == Line && letter[1] == Dot && letter[2] == Dot {
-            return 'd';
+            return Ok('d');
         } else if letter[0] == Line && letter[1] == Dot && letter[2] == Line {
-            return 'k';
+            return Ok('k');
         } else if letter[0] == Dot && letter[1] == Line && letter[2] == Dot {
-            return 'r';
+            return Ok('r');
         } else if letter[0] == Dot && letter[1] == Dot && letter[2] == Dot {
-            return 's';
+            return Ok('s');
         } else if letter[0] == Dot && letter[1] == Line && letter[2] == Line {
-            return 'w';
+            return Ok('w');
         } else if letter[0] == Dot && letter[1] == Dot && letter[2] == Line {
-            return 'u';
+            return Ok('u');
         } else {
             // if letter[0] == Line && letter[1] == Line && letter[2] == Line
-            return 'o';
+            return Ok('o');
         }
     } else if letter.len() == 4 {
         if letter[0] == Line && letter[1] == Dot && letter[2] == Dot && letter[3] == Dot {
-            return 'b';
+            return Ok('b');
         } else if letter[0] == Line && letter[1] == Dot && letter[2] == Line && letter[3] == Dot {
-            return 'c';
+            return Ok('c');
         } else if letter[0] == Dot && letter[1] == Dot && letter[2] == Line && letter[3] == Dot {
-            return 'f';
+            return Ok('f');
         } else if letter[0] == Dot && letter[1] == Dot && letter[2] == Dot && letter[3] == Dot {
-            return 'h';
+            return Ok('h');
         } else if letter[0] == Dot && letter[1] == Line && letter[2] == Line && letter[3] == Line {
-            return 'j';
+            return Ok('j');
         } else if letter[0] == Dot && letter[1] == Line && letter[2] == Dot && letter[3] == Dot {
-            return 'l';
+            return Ok('l');
         } else if letter[0] == Dot && letter[1] == Line && letter[2] == Line && letter[3] == Dot {
-            return 'p';
+            return Ok('p');
         } else if letter[0] == Line && letter[1] == Line && letter[2] == Dot && letter[3] == Line {
-            return 'q';
+            return Ok('q');
         } else if letter[0] == Dot && letter[1] == Dot && letter[2] == Dot && letter[3] == Line {
-            return 'v';
+            return Ok('v');
         } else if letter[0] == Line && letter[1] == Dot && letter[2] == Dot && letter[3] == Line {
-            return 'x';
+            return Ok('x');
         } else if letter[0] == Line && letter[1] == Dot && letter[2] == Line && letter[3] == Line {
-            return 'y';
+            return Ok('y');
         } else {
             // if letter[0] == Line && letter[1] == Line && letter[2] == Dot && letter[3] == Dot
-            return 'z';
+            return Ok('z');
         }
         //numbers
     } else if letter.len() == 5 {
@@ -118,82 +119,82 @@ pub fn into_int_char(letter: Vec<MorseUnit>) -> char {
             && letter[3] == Line
             && letter[4] == Line
         {
-            return '1';
+            return Ok('1');
         } else if letter[0] == Dot
             && letter[1] == Dot
             && letter[2] == Line
             && letter[3] == Line
             && letter[4] == Line
         {
-            return '2';
+            return Ok('2');
         } else if letter[0] == Dot
             && letter[1] == Dot
             && letter[2] == Dot
             && letter[3] == Line
             && letter[4] == Line
         {
-            return '3';
+            return Ok('3');
         } else if letter[0] == Dot
             && letter[1] == Dot
             && letter[2] == Dot
             && letter[3] == Dot
             && letter[4] == Line
         {
-            return '4';
+            return Ok('4');
         } else if letter[0] == Dot
             && letter[1] == Dot
             && letter[2] == Dot
             && letter[3] == Dot
             && letter[4] == Dot
         {
-            return '5';
+            return Ok('5');
         } else if letter[0] == Line
             && letter[1] == Dot
             && letter[2] == Dot
             && letter[3] == Dot
             && letter[4] == Dot
         {
-            return '6';
+            return Ok('6');
         } else if letter[0] == Line
             && letter[1] == Line
             && letter[2] == Dot
             && letter[3] == Dot
             && letter[4] == Dot
         {
-            return '7';
+            return Ok('7');
         } else if letter[0] == Line
             && letter[1] == Line
             && letter[2] == Line
             && letter[3] == Dot
             && letter[4] == Dot
         {
-            return '8';
+            return Ok('8');
         } else if letter[0] == Line
             && letter[1] == Line
             && letter[2] == Line
             && letter[3] == Line
             && letter[4] == Dot
         {
-            return '9';
+            return Ok('9');
         } else {
             // if letter[0] == Line && letter[1] == Line && letter[2] == Line && letter[3] == Line && letter[4] == Line
-            return '0';
+            return Ok('0');
         }
     } else {
-        panic!("")
+        Err(MorseError::InvalidMorseSequence)
     }
 }
 
-pub fn convert_from_bin(letter: &str) -> Vec<MorseUnit> {
+pub fn convert_from_bin(letter: &str) -> Result<Vec<MorseUnit>, MorseError> {
     let parts: Vec<&str> = letter.split('0').collect();
     let mut morse_letter = Vec::new();
     for unit in parts {
         match unit {
             "111" => morse_letter.push(Line),
             "1" => morse_letter.push(Dot),
-            _ => panic!("Wrond binary, cant parse"),
+            _ => return Err(MorseError::InvalidBinary),
         }
     }
 
-    morse_letter
+    Ok(morse_letter)
 }
