@@ -1,5 +1,6 @@
 use std::{error::Error, fmt};
 
+/// ## Error enum
 #[derive(Debug, PartialEq, Clone, Copy)]
 pub enum MorseError {
     InvalidChar,
@@ -31,4 +32,5 @@ impl Error for MorseError {
     }
 }
 
+/// ## Own Result type
 pub type MorseResult<T> = Result<T, MorseError>;
