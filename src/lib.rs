@@ -137,7 +137,11 @@ impl Morse {
         let mut morse: Vec<MorseChar> = Vec::new();
 
         for letter in text.chars() {
-            morse.push(MorseChar::from_char(letter, "International", from_int_char)?);
+            morse.push(MorseChar::from_char(
+                letter,
+                "International",
+                from_int_char,
+            )?);
         }
 
         Ok(Morse {
@@ -191,7 +195,7 @@ impl Morse {
         })
     }
     /// Parse binary into Morse Code.
-    pub fn parse_bin(&mut self, bin: &str)-> MorseResult<()> {
+    pub fn parse_bin(&mut self, bin: &str) -> MorseResult<()> {
         let words: Vec<&str> = bin.split("0000000").collect();
 
         for word in words {
@@ -408,7 +412,10 @@ mod morse_tests {
     #[test]
     fn create_from_binary_str() {
         const HELLO_BIN: &str = "1010101000100010111010100010111010100011101110111";
-        assert_eq!(Morse::from_int_bin(HELLO_BIN).unwrap().to_bin_str(), HELLO_BIN);
+        assert_eq!(
+            Morse::from_int_bin(HELLO_BIN).unwrap().to_bin_str(),
+            HELLO_BIN
+        );
     }
 
     #[test]

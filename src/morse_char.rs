@@ -144,7 +144,9 @@ mod morse_char_tests {
     #[test]
     fn create_from_text_str() {
         assert_eq!(
-            MorseChar::from_char('H', "International", from_int_char).unwrap().to_bin_str(),
+            MorseChar::from_char('H', "International", from_int_char)
+                .unwrap()
+                .to_bin_str(),
             "1010101"
         );
     }
@@ -153,7 +155,9 @@ mod morse_char_tests {
     fn create_from_binary_str() {
         const H_BIN: &str = "1010101";
         assert_eq!(
-            MorseChar::from_bin(H_BIN, "International", into_int_char).unwrap().to_bin_str(),
+            MorseChar::from_bin(H_BIN, "International", into_int_char)
+                .unwrap()
+                .to_bin_str(),
             H_BIN
         );
     }
@@ -161,7 +165,9 @@ mod morse_char_tests {
     #[test]
     fn to_string() {
         assert_eq!(
-            MorseChar::from_char('u', "International", from_int_char).unwrap().to_string(),
+            MorseChar::from_char('u', "International", from_int_char)
+                .unwrap()
+                .to_string(),
             ". . ⚊"
         );
     }
@@ -169,7 +175,9 @@ mod morse_char_tests {
     #[test]
     fn to_bin_str() {
         assert_eq!(
-            MorseChar::from_char('u', "International", from_int_char).unwrap().to_bin_str(),
+            MorseChar::from_char('u', "International", from_int_char)
+                .unwrap()
+                .to_bin_str(),
             "1010111"
         );
     }

@@ -1,6 +1,6 @@
 use crate::error::MorseError;
-use crate::{MorseResult, MorseUnit};
 use crate::MorseUnit::{Dot, Line, Whitespace};
+use crate::{MorseResult, MorseUnit};
 
 pub fn from_int_char(letter: char) -> MorseResult<Vec<MorseUnit>> {
     match letter.to_ascii_lowercase() {
@@ -41,9 +41,7 @@ pub fn from_int_char(letter: char) -> MorseResult<Vec<MorseUnit>> {
         '9' => Ok(vec![Line, Line, Line, Line, Dot]),
         '0' => Ok(vec![Line, Line, Line, Line, Line]),
         ' ' => Ok(vec![Whitespace]),
-        _ => {
-            Err(MorseError::InvalidChar)
-        }
+        _ => Err(MorseError::InvalidChar),
     }
 }
 
