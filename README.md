@@ -33,14 +33,14 @@ for Morse Library.
  ```
  use morse_lib::Morse;
 
- let morse = Morse::from_int_text("sos");
+ let morse = Morse::from_int_text("sos").unwrap();
 
  assert_eq!(
         morse.to_string(),
         ". . .   ⚊ ⚊ ⚊   . . ."
     );
 
-let morse = Morse::from_int_text("sos");
+let morse = Morse::from_int_text("sos").unwrap();
 morse.dot_as("🔥");
 morse.line_as("➖");
 
@@ -53,7 +53,7 @@ assert_eq!(
         "🔥 🔥 🔥   ➖ ➖ ➖   🔥 🔥 🔥"
     );
 
-let morse = Morse::from_int_bin("101010001110111011100010101");
+let morse = Morse::from_int_bin("101010001110111011100010101").unwrap();
 
  assert_eq!(
         morse.to_string(),
@@ -69,42 +69,42 @@ assert_eq!(text,"sos");
 #### Extended usage (Any language Morse Code)
 
 ```
-use morse_lib::{Morse, MorseUnit};
+use morse_lib::{Morse, MorseUnit, MorseResult, MorseError};
 use MorseUnit::{Dot, Line, Whitespace};
 
-fn from_char(letter: char) -> Vec<MorseUnit> {
+fn from_char(letter: char) -> MorseResult<Vec<MorseUnit>> {
     match letter {
-        'a' => vec![Dot, Line],
-        'б' => vec![Line, Dot, Dot, Dot],
-        'в' => vec![Dot, Line, Line],
-        'г' => vec![Dot, Dot, Dot, Dot],
+        'a' => Ok(vec![Dot, Line]),
+        'б' => Ok(vec![Line, Dot, Dot, Dot]),
+        'в' => Ok(vec![Dot, Line, Line]),
+        'г' => Ok(vec![Dot, Dot, Dot, Dot]),
         ... and other letters from alphabet
-        ' ' => vec![Whitespace],
-        _ => panic!("Wrong character")
+        ' ' => Ok(vec![Whitespace]),
+        _ => Err(MorseError::InvalidChar)
     }
 }
 
-fn into_char(letter: Vec<MorseUnit>) -> char {
+fn into_char(letter: Vec<MorseUnit>) -> MorseResult<char> {
     if letter.len() == 1 && letter[0] == Whitespace {
-        return ' ';
+        return Ok(' ');
     } else if letter.len() == 2 && letter[0] == Dot && letter[1] == Line {
-        return 'а'
+        return Ok('а')
     } else if letter.len() == 3 && letter[0] == Dot && letter[1] == Line && letter[2] == Line {
-        return 'в';
+        return Ok('в');
     } else if letter.len() == 4 {
         if letter[0] == Line && letter[1] == Dot && letter[2] == Dot && letter[3] == Dot {
-            return 'б';
+            return Ok('б');
         } else {
-            return 'г';
+            return Ok('г');
         }
     } else {
-        panic!("Wrong Morse Char sequence")
+        Err(MorseError::InvalidMorseSequence)
     }
 }
 
 let morse = Morse::new("Ukrainian".to_string(), from_char, into_char);
 
-morse.parse_text("Баба");
+morse.parse_text("Баба").unwrap();
 morse.dot_as("🔥");
 morse.line_as("➖");
 morse.beep();
