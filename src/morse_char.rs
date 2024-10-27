@@ -1,4 +1,4 @@
-use std::{thread, time};
+use std::{fmt, thread, time};
 
 use crate::{sound::TSound, MorseResult};
 
@@ -110,8 +110,8 @@ impl MorseChar {
     }
 }
 
-impl ToString for MorseChar {
-    fn to_string(&self) -> String {
+impl fmt::Display for MorseChar {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let mut string = String::new();
         for (idx, m_unit) in self.m_char.iter().enumerate() {
             match m_unit {
@@ -129,11 +129,9 @@ impl ToString for MorseChar {
                 string.push(' ');
             }
         }
-
-        string
+        write!(f, "{}", string)
     }
 }
-
 #[cfg(test)]
 mod morse_char_tests {
 

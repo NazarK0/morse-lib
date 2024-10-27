@@ -47,6 +47,9 @@ use display_chars::DisplayChars;
 
 mod sound;
 use sound::Sound;
+
+mod iterator;
+use iterator::*;
 // Public modules
 mod morse_unit;
 pub use morse_unit::MorseUnit;
@@ -59,7 +62,7 @@ pub use error::*;
 /// All magic going here
 #[derive(Debug, PartialEq, Clone)]
 pub struct Morse {
-    morse: Vec<MorseChar>,
+    morse_str: Vec<MorseChar>,
     language: String,
     display_as: DisplayChars,
     sound: Sound,
@@ -112,7 +115,7 @@ impl Morse {
         into_char: fn(Vec<MorseUnit>) -> MorseResult<char>,
     ) -> Morse {
         Morse {
-            morse: Vec::new(),
+            morse_str: Vec::new(),
             language,
             display_as: DisplayChars::default(),
             sound: Sound::default(),
@@ -134,10 +137,10 @@ impl Morse {
     ///    );
     /// ```
     pub fn from_int_text(text: &str) -> MorseResult<Morse> {
-        let mut morse: Vec<MorseChar> = Vec::new();
+        let mut morse_str: Vec<MorseChar> = Vec::new();
 
         for letter in text.chars() {
-            morse.push(MorseChar::from_char(
+            morse_str.push(MorseChar::from_char(
                 letter,
                 "International",
                 from_int_char,
@@ -145,7 +148,7 @@ impl Morse {
         }
 
         Ok(Morse {
-            morse,
+            morse_str,
             ..Morse::default()
         })
     }
@@ -179,18 +182,18 @@ impl Morse {
     /// ```
     pub fn from_int_bin(bin: &str) -> MorseResult<Morse> {
         let words: Vec<&str> = bin.split("0000000").collect();
-        let mut morse: Vec<MorseChar> = Vec::new();
+        let mut morse_str: Vec<MorseChar> = Vec::new();
 
         for word in words {
             let letters: Vec<&str> = word.split("000").collect();
 
             for letter in letters {
-                morse.push(MorseChar::from_bin(letter, "International", into_int_char)?);
+                morse_str.push(MorseChar::from_bin(letter, "International", into_int_char)?);
             }
         }
 
         Ok(Morse {
-            morse,
+            morse_str,
             ..Morse::default()
         })
     }
@@ -202,7 +205,7 @@ impl Morse {
             let letters: Vec<&str> = word.split("000").collect();
 
             for letter in letters {
-                self.morse.push(MorseChar::from_bin(
+                self.morse_str.push(MorseChar::from_bin(
                     letter,
                     &self.language,
                     self.into_char_converter,
@@ -215,15 +218,15 @@ impl Morse {
 
     /// Play sound that represent Morse Code.
     pub fn to_beep(&self) {
-        let morse = RefCell::new(self.morse.clone());
-        for (idx, m_char) in morse.borrow_mut().iter_mut().enumerate() {
+        let morse_str = RefCell::new(self.morse_str.clone());
+        for (idx, m_char) in morse_str.borrow_mut().iter_mut().enumerate() {
             m_char.frequency(self.sound.frequency);
             m_char.play_speed(self.sound.speed);
 
             m_char.to_beep();
 
             // The space between letters is three units
-            if idx < self.morse.len() - 1 {
+            if idx < self.morse_str.len() - 1 {
                 thread::sleep(time::Duration::from_secs(3));
             }
         }
@@ -326,11 +329,11 @@ impl Morse {
     pub fn to_bin_str(&self) -> String {
         let mut string = String::new();
 
-        for (idx, m_char) in self.morse.iter().enumerate() {
+        for (idx, m_char) in self.morse_str.iter().enumerate() {
             string.push_str(&m_char.to_bin_str());
 
             // The space between letters is three units
-            if idx < self.morse.len() - 1 {
+            if idx < self.morse_str.len() - 1 {
                 string.push_str("000");
             }
         }
@@ -354,18 +357,48 @@ impl Morse {
     pub fn to_text(&self) -> String {
         let mut text = String::new();
 
-        for m_char in &self.morse {
+        for m_char in &self.morse_str {
             text.push(m_char.get_letter());
         }
 
         text
+    }
+
+    /// Now we can iterate:
+    /// ```
+    /// use morse_lib::Morse;
+    ///
+    /// let morse = Morse::from_int_text("sos").unwrap();
+    /// for char in morse.iter() {
+    ///     println!("{}", char);
+    /// }
+    /// ```
+    pub fn iter(&self) -> MorseIterator {
+        MorseIterator::init(self)
+    }
+}
+
+impl IntoIterator for Morse {
+    type Item = MorseChar;
+    type IntoIter = MorseIntoIterator;
+
+    /// ```
+    /// use morse_lib::Morse;
+    ///
+    /// let morse = Morse::from_int_text("sos").unwrap();
+    /// for char in morse {
+    /// println!("{}", char);
+    /// }
+    /// ```
+    fn into_iter(self) -> MorseIntoIterator {
+        MorseIntoIterator { morse: self }
     }
 }
 
 impl Default for Morse {
     fn default() -> Self {
         Self {
-            morse: Vec::new(),
+            morse_str: Vec::new(),
             language: "International".to_string(),
             display_as: DisplayChars::default(),
             sound: Sound::default(),
@@ -379,7 +412,7 @@ impl ToString for Morse {
     /// Return String value of Morse Code.
     fn to_string(&self) -> String {
         let mut string = String::new();
-        let morse = RefCell::new(self.morse.clone());
+        let morse = RefCell::new(self.morse_str.clone());
 
         for (idx, m_char) in morse.borrow_mut().iter_mut().enumerate() {
             m_char.dot_as(&self.display_as.dot);
@@ -388,7 +421,7 @@ impl ToString for Morse {
             string.push_str(&m_char.to_string());
 
             // The space between letters is three units
-            if idx < self.morse.len() - 1 {
+            if idx < self.morse_str.len() - 1 {
                 string.push_str("   ");
             }
         }
