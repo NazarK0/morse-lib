@@ -1,12 +1,12 @@
-use crate::{Morse, MorseChar};
+use crate::{MorseChar, MorseCustom};
 
 pub struct MorseIterator<'a> {
-    morse: &'a Morse,
+    morse: &'a MorseCustom,
     index: usize,
 }
 
 impl<'a> MorseIterator<'a> {
-    pub fn init(morse: &'a Morse) -> MorseIterator<'a> {
+    pub fn init(morse: &'a MorseCustom) -> MorseIterator<'a> {
         MorseIterator { morse, index: 0 }
     }
 }
@@ -26,7 +26,7 @@ impl<'a> Iterator for MorseIterator<'a> {
 }
 
 pub struct MorseIntoIterator {
-    pub morse: Morse,
+    pub morse: MorseCustom,
 }
 
 impl Iterator for MorseIntoIterator {
