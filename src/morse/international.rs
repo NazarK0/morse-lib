@@ -1,7 +1,7 @@
 use std::{cell::RefCell, ops::Index};
 
 use crate::{
-    display_chars::DisplayChars, from_int_char, into_int_char, MorseChar, MorseResult, MorseUnit,
+    display_chars::DisplayChars, MorseChar, MorseResult, MorseUnit,
 };
 
 #[cfg(feature = "audio")]
@@ -13,6 +13,9 @@ use super::TMorse;
 
 mod iterator;
 use iterator::*;
+
+mod converters;
+pub use converters::*;
 
 /// ## International standart Morse Code (default feature).
 #[derive(Debug, PartialEq, Clone)]

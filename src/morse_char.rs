@@ -140,12 +140,13 @@ impl fmt::Display for MorseChar {
 }
 #[cfg(test)]
 mod morse_char_tests {
-
-    use crate::{from_int_char, into_int_char};
+    #[cfg(feature = "international")]
+    use crate::morse::{from_int_char, into_int_char};
 
     use super::*;
 
     #[test]
+    #[cfg(feature = "international")]
     fn create_from_text_str() {
         assert_eq!(
             MorseChar::from_char('H', from_int_char)
@@ -156,6 +157,7 @@ mod morse_char_tests {
     }
 
     #[test]
+    #[cfg(feature = "international")]
     fn create_from_binary_str() {
         const H_BIN: &str = "1010101";
         assert_eq!(
@@ -167,6 +169,7 @@ mod morse_char_tests {
     }
 
     #[test]
+    #[cfg(feature = "international")]
     fn to_string() {
         assert_eq!(
             MorseChar::from_char('u', from_int_char)
@@ -177,6 +180,7 @@ mod morse_char_tests {
     }
 
     #[test]
+    #[cfg(feature = "international")]
     fn to_bin_str() {
         assert_eq!(
             MorseChar::from_char('u', from_int_char)
@@ -186,6 +190,7 @@ mod morse_char_tests {
         );
     }
     #[test]
+    #[cfg(feature = "international")]
     fn set_aliases_for_whitespace_lines_and_dots() {
         let mut morse = MorseChar::from_char('u', from_int_char).unwrap();
 

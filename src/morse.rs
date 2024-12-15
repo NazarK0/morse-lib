@@ -4,7 +4,8 @@ pub use t_morse::TMorse;
 #[cfg(feature = "international")]
 mod international;
 #[cfg(feature = "international")]
-pub use international::Morse;
+pub use international::*;
+
 #[cfg(feature = "custom")]
 mod custom;
 #[cfg(feature = "custom")]
