@@ -1,5 +1,5 @@
 # Morse Library changelog
-[0.4.0]
+[0.4.1]
 * Separate International Morse from Custom
 * Split library by features - International(default), Custom, Audio
 * Trait TMorse with common methods
