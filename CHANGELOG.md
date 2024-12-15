@@ -1,4 +1,8 @@
 # Morse Library changelog
+[0.4.0]
+* Separate International Morse from Custom
+* Split library by features - International(default), Custom, Audio
+* Trait TMorse with common methods
 [0.3.0]
 * Implement Iterator and IntoIterator
 * Create own Result, Error, and error propagation
