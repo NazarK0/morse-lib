@@ -2,6 +2,7 @@ use std::time::Duration;
 
 use rodio::{source::SineWave, OutputStream, Sink, Source};
 
+/// ## Audio part for Morse Code (feature).
 #[derive(Debug, PartialEq, Clone)]
 pub struct Sound {
     pub frequency: f32,

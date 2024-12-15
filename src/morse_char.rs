@@ -1,15 +1,21 @@
-use std::{fmt, thread, time};
+use std::fmt;
 
-use crate::{sound::TSound, MorseResult};
+use crate::MorseResult;
 
 // use super::MorseUnit::Whitespace;
-use super::{convert_from_bin, DisplayChars, MorseUnit, Sound};
+use super::{convert_from_bin, DisplayChars, MorseUnit};
+
+#[cfg(feature = "audio")]
+use std::{thread, time};
+#[cfg(feature = "audio")]
+use super::{sound::TSound, Sound};
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct MorseChar {
     m_char: Vec<MorseUnit>,
     letter: char,
     display_as: DisplayChars,
+    #[cfg(feature = "audio")]
     sound: Sound,
 }
 
@@ -24,6 +30,7 @@ impl MorseChar {
             m_char,
             letter,
             display_as: DisplayChars::default(),
+            #[cfg(feature = "audio")]
             sound: Sound::default(),
         })
     }
@@ -38,10 +45,12 @@ impl MorseChar {
             m_char: m_char.clone(),
             letter: into_char(m_char)?,
             display_as: DisplayChars::default(),
+            #[cfg(feature = "audio")]
             sound: Sound::default(),
         })
     }
 
+    #[cfg(feature = "audio")]
     pub fn to_beep(&self) {
         for (idx, m_unit) in self.m_char.iter().enumerate() {
             let _ = match m_unit {
@@ -93,9 +102,11 @@ impl MorseChar {
         self.display_as.whitespace = alias.to_string();
     }
 
+    #[cfg(feature = "audio")]
     pub fn frequency(&mut self, frequency: f32) {
         self.sound.frequency = frequency;
     }
+    #[cfg(feature = "audio")]
     pub fn play_speed(&mut self, speed: f32) {
         self.sound.speed = speed;
     }

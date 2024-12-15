@@ -1,19 +1,22 @@
-use std::{cell::RefCell, ops::Index, thread, time};
+use std::{cell::RefCell, ops::Index};
+use crate::{display_chars::DisplayChars, MorseChar, MorseResult, MorseUnit};
 
-use crate::{display_chars::DisplayChars, sound::Sound, MorseChar, MorseResult, MorseUnit};
+#[cfg(feature = "audio")]
+use crate::sound::Sound;
+#[cfg(feature = "audio")]
+use std::{thread, time};
 
 mod iterator;
 use iterator::*;
 
 use super::TMorse;
 
-/// ## Main library struct.
-///
-/// All magic going here
+/// ## Custom language Morse Code (feature).
 #[derive(Debug, PartialEq, Clone)]
 pub struct MorseCustom {
     morse_str: Vec<MorseChar>,
     display_as: DisplayChars,
+    #[cfg(feature = "audio")]
     sound: Sound,
     from_char_converter: fn(char) -> MorseResult<Vec<MorseUnit>>,
     into_char_converter: fn(Vec<MorseUnit>) -> MorseResult<char>,
@@ -25,13 +28,10 @@ impl TMorse for MorseCustom {
         let mut morse: Vec<MorseChar> = Vec::new();
 
         for letter in text.chars() {
-            morse.push(MorseChar::from_char(
-                letter,
-                self.from_char_converter,
-            )?);
+            morse.push(MorseChar::from_char(letter, self.from_char_converter)?);
         }
 
-        self.morse_str  = morse;
+        self.morse_str = morse;
         Ok(())
     }
 
@@ -43,10 +43,8 @@ impl TMorse for MorseCustom {
             let letters: Vec<&str> = word.split("000").collect();
 
             for letter in letters {
-                self.morse_str.push(MorseChar::from_bin(
-                    letter,
-                    self.into_char_converter,
-                )?);
+                self.morse_str
+                    .push(MorseChar::from_bin(letter, self.into_char_converter)?);
             }
         }
 
@@ -116,29 +114,10 @@ impl MorseCustom {
         MorseCustom {
             morse_str: Vec::new(),
             display_as: DisplayChars::default(),
+            #[cfg(feature = "audio")]
             sound: Sound::default(),
             from_char_converter: from_char,
             into_char_converter: into_char,
-        }
-    }
-
-    
-
-    
-
-    /// Play sound that represent Morse Code.
-    pub fn to_beep(&self) {
-        let morse_str = RefCell::new(self.morse_str.clone());
-        for (idx, m_char) in morse_str.borrow_mut().iter_mut().enumerate() {
-            m_char.frequency(self.sound.frequency);
-            m_char.play_speed(self.sound.speed);
-
-            m_char.to_beep();
-
-            // The space between letters is three units
-            if idx < self.morse_str.len() - 1 {
-                thread::sleep(time::Duration::from_secs(3));
-            }
         }
     }
 
@@ -183,10 +162,7 @@ impl MorseCustom {
     /// morse.parse_text("ба").unwrap();
     /// morse.dot_as("🔥");
     ///
-    /// assert_eq!(
-    ///        morse.to_string(),
-    ///        "⚊ 🔥 🔥 🔥   🔥 ⚊"
-    ///    );
+    /// assert_eq!(morse.to_string(), "⚊ 🔥 🔥 🔥   🔥 ⚊");
     /// ```
     pub fn dot_as(&mut self, alias: &str) {
         self.display_as.dot = alias.to_string();
@@ -232,10 +208,7 @@ impl MorseCustom {
     /// morse.parse_text("ба").unwrap();
     /// morse.line_as("➖");
     ///
-    /// assert_eq!(
-    ///        morse.to_string(),
-    ///        "➖ . . .   . ➖"
-    ///    );
+    /// assert_eq!(morse.to_string(), "➖ . . .   . ➖");
     /// ```
     pub fn line_as(&mut self, alias: &str) {
         self.display_as.line = alias.to_string();
@@ -281,15 +254,42 @@ impl MorseCustom {
     /// morse.parse_text("б а").unwrap();
     /// morse.whitespace_as("🚧");
     ///
-    /// assert_eq!(
-    ///        morse.to_string(),
-    ///        "⚊ . . .   🚧   . ⚊"
-    ///    );
+    /// assert_eq!(morse.to_string(), "⚊ . . .   🚧   . ⚊");
     /// ```
     pub fn whitespace_as(&mut self, alias: &str) {
         self.display_as.whitespace = alias.to_string();
     }
+
+    /// Play sound that represent Morse Code.
+    /// <div class="warning">
+    /// 
+    /// **Only** available **if "audio"** feature is **enabled.**
+    /// 
+    /// </div>
+    /// 
+    #[cfg(feature = "audio")]
+    pub fn to_beep(&self) {
+        let morse_str = RefCell::new(self.morse_str.clone());
+        for (idx, m_char) in morse_str.borrow_mut().iter_mut().enumerate() {
+            m_char.frequency(self.sound.frequency);
+            m_char.play_speed(self.sound.speed);
+
+            m_char.to_beep();
+
+            // The space between letters is three units
+            if idx < self.morse_str.len() - 1 {
+                thread::sleep(time::Duration::from_secs(3));
+            }
+        }
+    }
+
     /// Set sound frequency in MHz.
+    /// <div class="warning">
+    /// 
+    /// **Only** available **if "audio"** feature is **enabled.**
+    /// 
+    /// </div>
+    /// 
     /// # Examples
     ///
     /// ```
@@ -330,13 +330,21 @@ impl MorseCustom {
     /// morse.parse_text("б а").unwrap();
     /// morse.frequency(643.0);
     /// ```
+    #[cfg(feature = "audio")]
     pub fn frequency(&mut self, frequency: f32) {
         self.sound.frequency = frequency;
     }
+
     /// Set sound speed.
-    /// 1 - normal speed
-    /// > 1 - faster
-    /// < 1 - slower
+    /// <div class="warning">
+    /// 
+    /// **Only** available **if "audio"** feature is **enabled.**
+    /// 
+    /// </div>
+    /// 
+    /// * '1' - normal speed
+    /// * '> 1' - faster
+    /// * '< 1' - slower
     /// # Examples
     ///
     /// ```
@@ -377,9 +385,11 @@ impl MorseCustom {
     /// morse.parse_text("б а").unwrap();
     /// morse.play_speed(2.0);
     /// ```
+    #[cfg(feature = "audio")]
     pub fn play_speed(&mut self, speed: f32) {
         self.sound.speed = speed;
     }
+
     /// Creates binary-formatted Morse Code.
     /// # Examples
     ///
@@ -523,10 +533,7 @@ mod morse_tests {
         let mut morse = MorseCustom::new(from_char, into_char);
         morse.parse_text("Ба").unwrap();
 
-        assert_eq!(
-            morse.to_bin_str(),
-            "11101010100010111"
-        );
+        assert_eq!(morse.to_bin_str(), "11101010100010111");
     }
 
     #[test]
@@ -543,7 +550,7 @@ mod morse_tests {
     fn to_string() {
         let mut morse = MorseCustom::new(from_char, into_char);
         morse.parse_text("ба").unwrap();
-        
+
         assert_eq!(morse.to_string(), "⚊ . . .   . ⚊");
     }
 
@@ -566,6 +573,9 @@ mod morse_tests {
         morse.line_as("➖");
         morse.whitespace_as("🚧");
 
-        assert_eq!(morse.to_string(), "➖ 🔥 🔥 🔥   🔥 ➖   🚧   ➖ 🔥 🔥 🔥   🔥 ➖");
+        assert_eq!(
+            morse.to_string(),
+            "➖ 🔥 🔥 🔥   🔥 ➖   🚧   ➖ 🔥 🔥 🔥   🔥 ➖"
+        );
     }
 }
