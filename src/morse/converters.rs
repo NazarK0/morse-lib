@@ -187,9 +187,9 @@ pub fn into_int_char(letter: Vec<MorseUnit>) -> MorseResult<char> {
 /// # Examples
 ///
 /// ```
-/// use morse_lib::Morse;
+/// use morse_lib::{Morse, Languages};
 ///
-/// let morse = Morse::from_bin("101010001110111011100010101").unwrap();
+/// let morse = Morse::from_bin("101010001110111011100010101", Languages::International).unwrap();
 ///
 /// assert_eq!(morse.to_string(), ". . .   ⚊ ⚊ ⚊   . . .");
 /// ```

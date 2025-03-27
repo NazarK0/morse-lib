@@ -55,6 +55,7 @@
 // Private modules
 mod morse_char;
 use morse_char::*;
+pub use morse_char::Languages;
 
 mod morse_processors;
 use morse_processors::*;
@@ -77,6 +78,3 @@ pub use error::*;
 mod morse;
 #[cfg(feature = "international")]
 pub use morse::Morse;
-#[cfg(feature = "custom")]
-pub use morse::MorseCustom;
-pub use morse::TMorse;

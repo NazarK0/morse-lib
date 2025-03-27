@@ -79,16 +79,16 @@ for Morse Library.
 #### International Morse Code usage (default)
 (With enabled "audio" feature)
  ```
- use morse_lib::Morse;
+ use morse_lib::{Morse, Languages};
 
- let morse = Morse::from_text("sos").unwrap();
+ let morse = Morse::from_text("sos", Languages::International).unwrap();
 
  assert_eq!(
         morse.to_string(),
         ". . .   ⚊ ⚊ ⚊   . . ."
     );
 
-let morse = Morse::from_text("sos").unwrap();
+let morse = Morse::from_text("sos", Languages::International).unwrap();
 morse.dot_as("🔥");
 morse.line_as("➖");
 
@@ -102,7 +102,7 @@ assert_eq!(
         "🔥 🔥 🔥   ➖ ➖ ➖   🔥 🔥 🔥"
     );
 
-let morse = Morse::from_bin("101010001110111011100010101").unwrap();
+let morse = Morse::from_bin("101010001110111011100010101", Languages::International).unwrap();
 
  assert_eq!(
         morse.to_string(),
@@ -118,7 +118,7 @@ assert_eq!(text,"sos");
 #### Custom language Morse Code usage
 
 ```
-use morse_lib::{MorseCustom, MorseUnit, MorseResult, MorseError, TMorse};
+use morse_lib::{Morse, Language, MorseUnit, MorseResult, MorseError};
 use MorseUnit::{Dot, Line, Whitespace};
 
 fn from_char(letter: char) -> MorseResult<Vec<MorseUnit>>{
@@ -150,9 +150,8 @@ fn into_char(letter: Vec<MorseUnit>) -> MorseResult<char> {
     }
 }
 
-let morse = MorseCustom::new(from_char, into_char);
+let morse = Morse.from_text("Баба", Language("Ukrainian", from_char, into_char)).unwrap();
 
-morse.parse_text("Баба").unwrap();
 morse.dot_as("🔥");
 morse.line_as("➖");
 

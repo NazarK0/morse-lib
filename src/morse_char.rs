@@ -1,6 +1,6 @@
 use std::fmt;
 mod languages;
-use languages::Languages;
+pub use languages::Languages;
 
 use crate::{
     morse::{from_bin_char, from_int_char, into_int_char},
