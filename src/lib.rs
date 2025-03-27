@@ -43,13 +43,13 @@
 //! This is some examples as a dependency in Cargo.toml of enabling/disabling features in library:
 //! ```toml
 //! // for international Morse code, no audio:
-//! morse-lib = "0.4.1"
+//! morse-lib = "0.4.3"
 //! // for all features:
-//! morse-lib = { version = "0.4.1", features = ["custom", "audio"] } 
+//! morse-lib = { version = "0.4.3", features = ["custom", "audio"] } 
 //! // for custom Morse code only:
-//! morse-lib = { version = "0.4.1", default-features = false, features = ["custom"] } 
+//! morse-lib = { version = "0.4.3", default-features = false, features = ["custom"] } 
 //! // for custom Morse code only and audio features:
-//! morse-lib = { version = "0.4.1", default-features = false, features = ["custom", "audio"] } 
+//! morse-lib = { version = "0.4.3", default-features = false, features = ["custom", "audio"] } 
 //! ```
 
 // Private modules
