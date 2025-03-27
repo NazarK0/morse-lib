@@ -1,4 +1,6 @@
 # Morse Library changelog
+[0.4.3]
+* Update dependency: Rodio crate to newest version (0.20.1)
 [0.4.1]
 * Separate International Morse from Custom
 * Split library by features - International(default), Custom, Audio
