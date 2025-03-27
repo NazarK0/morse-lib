@@ -182,3 +182,27 @@ pub fn into_int_char(letter: Vec<MorseUnit>) -> MorseResult<char> {
         Err(MorseError::InvalidMorseSequence)
     }
 }
+
+/// Creates International Morse Code struct from binary.
+/// # Examples
+///
+/// ```
+/// use morse_lib::Morse;
+///
+/// let morse = Morse::from_bin("101010001110111011100010101").unwrap();
+///
+/// assert_eq!(morse.to_string(), ". . .   ⚊ ⚊ ⚊   . . .");
+/// ```
+pub fn from_bin_char(bin_letter: &str) -> MorseResult<Vec<MorseUnit>> {
+    let parts: Vec<&str> = bin_letter.split('0').collect();
+    let mut morse_letter = Vec::new();
+    for unit in parts {
+        match unit {
+            "111" => morse_letter.push(Line),
+            "1" => morse_letter.push(Dot),
+            _ => return Err(MorseError::InvalidBinary),
+        }
+    }
+
+    Ok(morse_letter)
+}

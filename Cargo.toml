@@ -17,6 +17,8 @@ rodio = {version = "0.20.1", optional = true}
 default = ["international"]
 international = []
 custom = []
+multi = []
+pretty = []
 audio = ["dep:rodio"]
 
 [package.metadata.docs.rs]
